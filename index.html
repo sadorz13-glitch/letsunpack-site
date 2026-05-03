@@ -3,22 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unpack</title>
+  <title>Unpack — The New Way to Journal</title>
+  <meta name="description" content="Unpack removes the friction of journaling. The app asks the questions. You just answer honestly.">
+  <meta property="og:title" content="Unpack — The New Way to Journal">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500;1,600&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
   <style>
-    body {
-      background: #0a0a0a;
-      color: #b48c5a;
-      font-family: Georgia, serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0a0a0a; --black-mid: #111111; --black-soft: #181818;
+      --gold: #b48c5a; --gold-dim: #8a6a3f; --gold-pale: #d4ab7a;
+      --cream: #e8ddd0; --cream-dim: #b0a090; --white: #f5f0ea;
+      --rule: rgba(180,140,90,0.18);
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'Jost', 'Helvetica Neue', sans-serif;
+      --max: 1200px; --gutter: clamp(24px,5vw,80px);
     }
-    h1 { font-style: italic; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body { background: var(--black); color: var(--cream-dim); font-family: var(--sans); font-weight: 300; font-size: 16px; line-height: 1.7; overflow-x: hidden; }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 400; line-height: 1.1; color: var(--white); }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); position: relative; z-index: 1; }
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 0.9s cubic-bezier(0.22,1,0.36,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.10s; }
+    .reveal-delay-2 { transition-delay: 0.22s; }
+    .reveal-delay-3 { transition-delay: 0.36s; }
+    .reveal-delay-4 { transition-delay: 0.50s; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 28px var(--gutter); display: flex; align-items: center; justify-content: space-between; transition: background 0.5s, padding 0.4s, border-color 0.5s; border-bottom: 1px solid transparent; }
+    nav.scrolled { background: rgba(10,10,10,0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding-top: 18px; padding-bottom: 18px; border-bottom-color: var(--rule); }
+    .nav-logo { font-family: var(--serif); font-style: italic; font-size: 1.5rem; color: var(--gold); text-decoration: none; }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a { font-family: var(--sans); font-size: 0.68rem; font-weight: 300; letter-spacing: 0.16em; text-transform: uppercase; color: var(--cream-dim); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--gold); }
+    .hero { min-height: 100svh; display: grid; place-items: center; padding: 140px var(--gutter) 100px; position: relative; overflow: hidden; }
+    .hero-glow { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 700px; height: 700px; background: radial-gradient(ellipse at center, rgba(180,140,90,0.08) 0%, transparent 65%); pointer-events: none; }
+    .hero-inner { text-align: center; max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-eyebrow { display: inline-block; font-family: var(--sans); font-size: 0.65rem; font-weight: 300; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); margin-bottom: 40px; opacity: 0; animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) 0.3s forwards; }
+    .hero-headline { font-family: var(--serif); font-size: clamp(3.8rem,9vw,8rem); font-style: italic; font-weight: 400; line-height: 0.93; color: var(--white); opacity: 0; animation: fadeUp 1.1s cubic-bezier(0.22,1,0.36,1) 0.5s forwards; }
+    .hero-headline .accent { color: var(--gold); }
+    .hero-sub { font-family: var(--serif); font-size: clamp(1.15rem,2.2vw,1.6rem); font-style: italic; font-weight: 300; color: var(--cream-dim); margin-top: 32px; margin-bottom: 56px; line-height: 1.55; max-width: 580px; margin-left: auto; margin-right: auto; opacity: 0; animation: fadeUp 1.1s cubic-bezier(0.22,1,0.36,1) 0.72s forwards; }
+    .hero-cta-wrap { opacity: 0; animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) 0.95s forwards; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 14px; font-family: var(--sans); font-size: 0.7rem; font-weight: 300; letter-spacing: 0.22em; text-transform: uppercase; color: var(--black); background: var(--gold); padding: 18px 46px; text-decoration: none; border: none; cursor: pointer; transition: background 0.25s, transform 0.2s, box-shadow 0.25s; box-shadow: 0 4px 40px rgba(180,140,90,0.2); }
+    .btn-primary:hover { background: var(--gold-pale); transform: translateY(-2px); box-shadow: 0 8px 64px rgba(180,140,90,0.3); }
+    .btn-arrow { display: inline-block; font-style: normal; transition: transform 0.2s; }
+    .btn-primary:hover .btn-arrow { transform: translateX(4px); }
+    .hero-note { margin-top: 22px; font-size: 0.65rem; font-weight: 300; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-dim); opacity: 0; animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) 1.12s forwards; }
+    .hero-rule { position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(180,140,90,0.25) 25%, rgba(180,140,90,0.45) 50%, rgba(180,140,90,0.25) 75%, transparent 100%); }
   </style>
 </head>
 <body>
-  <h1>Unpack</h1>
+
+  <nav id="nav">
+    <a class="nav-logo" href="/">Unpack</a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#notify">Get notified</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+      <span class="hero-eyebrow">iOS &middot; Coming to the App Store</span>
+      <h1 class="hero-headline">The <span class="accent">new&nbsp;way</span><br>to journal.</h1>
+      <p class="hero-sub">You already know what you need to say.<br>We&rsquo;ll ask the right questions.</p>
+      <div class="hero-cta-wrap">
+        <a href="#notify" class="btn-primary">
+          Notify me when it&rsquo;s live
+          <span class="btn-arrow">&rarr;</span>
+        </a>
+      </div>
+      <p class="hero-note">Coming soon &middot; Free to start</p>
+    </div>
+    <div class="scroll-cue">
+      <span class="scroll-cue-label">Scroll</span>
+      <div class="scroll-cue-line"></div>
+    </div>
+    <div class="hero-rule"></div>
+  </section>
+
+  <section class="intro">
+    <div class="intro-grid container">
+      <div class="reveal">
+        <span class="section-label">The problem with journaling</span>
+        <h2 class="intro-headline">The blank page<br>never asks<br><em style="color:var(--gold)">the right thing.</em></h2>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="intro-body">
+          <p>Most people want to journal. They buy the notebooks. They mean to start. But when they sit down, the blankness stares back&mdash;and they have no idea where to begin.</p>
+          <p>Unpack removes that friction entirely. Instead of facing the page, you face a question. Then another. Before you know it, you&rsquo;ve said something true.</p>
+          <p>That&rsquo;s the whole idea.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">What it does</span>
+        <h2 class="section-title">Built for honesty,<br><em>not performance.</em></h2>
+      </div>
+    </div>
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-card reveal reveal-delay-1">
+          <span class="feature-number">01</span>
+          <h3 class="feature-title">No blank page, ever.</h3>
+          <p class="feature-body">Unpack opens with a question tailored to you&mdash;your mood, your week, what you haven&rsquo;t said out loud yet. You don&rsquo;t have to start. You just have to answer.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <span class="feature-number">02</span>
+          <h3 class="feature-title">Reflection that goes deeper.</h3>
+          <p class="feature-body">Our prompts are designed to do what a good therapist does: go beyond the surface. You&rsquo;ll surprise yourself with what comes up when someone asks well.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <span class="feature-number">03</span>
+          <h3 class="feature-title">Say it out loud.</h3>
+          <p class="feature-body">Voice journaling lets you speak your thoughts instead of writing them. Sometimes the words come easier when you&rsquo;re not watching your own hand write them down.</p>
+        </div>
+        <div class="feature-card reveal reveal-delay-4">
+          <span class="feature-number">04</span>
+          <h3 class="feature-title">Watch yourself over time.</h3>
+          <p class="feature-body">Unpack tracks your emotional patterns across weeks and months&mdash;not to diagnose you, but to show you what you already know and haven&rsquo;t yet admitted to yourself.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how-it-works">
+    <div class="how-inner">
+      <div class="section-header reveal">
+        <span class="section-label">The process</span>
+        <h2 class="section-title">Three minutes.<br><em>One honest answer.</em></h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal reveal-delay-1">
+          <span class="step-num">01</span>
+          <h3 class="step-title">Open the app.</h3>
+          <p class="step-body">No setup ritual. No blank page. Unpack greets you with a single, specific question&mdash;something that cuts through the noise of your day.</p>
+        </div>
+        <div class="step reveal reveal-delay-2">
+          <span class="step-num">02</span>
+          <h3 class="step-title">Answer honestly.</h3>
+          <p class="step-body">Write, speak, or type&mdash;whatever feels natural. The only rule is that you mean it. No one is reading this but you.</p>
+        </div>
+        <div class="step reveal reveal-delay-3">
+          <span class="step-num">03</span>
+          <h3 class="step-title">Come back tomorrow.</h3>
+          <p class="step-body">Over time, the patterns surface. The insights emerge. You&rsquo;ll understand yourself a little better than you did the day before. That&rsquo;s the whole promise.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote-section">
+    <blockquote class="pull-quote reveal">&ldquo;The question you avoid<br>is the one <em>worth answering.</em>&rdquo;</blockquote>
+  </section>
+
+  <section class="cta-section" id="notify">
+    <div class="container" style="max-width:680px;position:relative;z-index:1">
+      <span class="cta-label reveal">Coming to the App Store</span>
+      <h2 class="cta-headline reveal reveal-delay-1">Be first to know<br>when we&rsquo;re live.</h2>
+      <p class="cta-sub reveal reveal-delay-2">We&rsquo;re putting the finishing touches on Unpack. Leave your email and we&rsquo;ll reach out the moment it&rsquo;s available.</p>
+      <div class="reveal reveal-delay-3">
+        <form class="notify-form" id="notifyForm" onsubmit="handleNotify(event)">
+          <input class="notify-input" type="email" name="email" placeholder="Your email address" required autocomplete="email">
+          <button class="notify-btn" type="submit">Notify me</button>
+        </form>
+        <div class="notify-success" id="notifySuccess">Thank you. We&rsquo;ll be in touch.</div>
+        <p class="notify-note">No spam, ever. &nbsp;<a href="/privacy">Privacy policy.</a></p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <a class="footer-logo" href="/">Unpack</a>
+      <ul class="footer-links">
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/terms">Terms</a></li>
+      </ul>
+      <span class="footer-copy">&copy; 2026 Unpack</span>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); }, { passive: true });
+    const revealEls = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+      }, { threshold: 0.12, rootMargin: '0px 0px -36px 0px' });
+      revealEls.forEach(el => io.observe(el));
+    } else { revealEls.forEach(el => el.classList.add('visible')); }
+    function handleNotify(e) {
+      e.preventDefault();
+      document.getElementById('notifyForm').style.display = 'none';
+      document.getElementById('notifySuccess').style.display = 'block';
+    }
+  </script>
 </body>
 </html>
